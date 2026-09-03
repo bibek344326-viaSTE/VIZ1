@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>VIZ1 Exercises 1.2-1.4</title>
+	<style>
+		:root { color-scheme: light; --ink: #17212b; --muted: #61707d; --line: #d8e0e6; --paper: #f7f5ef; --panel: #fff; --accent: #d45736; --accent-dark: #8f321f; }
+		* { box-sizing: border-box; }
+		body { margin: 0; color: var(--ink); background: radial-gradient(circle at 90% 0%, #f2d8c8 0, transparent 30%), var(--paper); font-family: Georgia, "Times New Roman", serif; }
+		main { max-width: 1000px; margin: 0 auto; padding: 56px 24px 72px; }
+		header { border-bottom: 2px solid var(--ink); padding-bottom: 24px; margin-bottom: 28px; }
+		.eyebrow { color: var(--accent-dark); font: 700 .78rem/1.2 Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+		h1 { max-width: 650px; margin: 10px 0; font-size: clamp(2.2rem, 6vw, 4.6rem); line-height: .98; font-weight: 500; }
+		header p { max-width: 620px; margin: 18px 0 0; color: var(--muted); font: 1rem/1.6 Arial, sans-serif; }
+		section { margin-top: 30px; } h2 { margin: 0 0 12px; font-size: 1.65rem; font-weight: 500; }
+		.status { color: var(--accent-dark); font: .86rem Arial, sans-serif; }
+		.summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 18px 0 30px; }
+		.stat, .table-wrap { background: var(--panel); border: 1px solid var(--line); box-shadow: 0 8px 20px #24313a0d; }
+		.stat { padding: 18px; } .stat-label { color: var(--muted); font: .72rem Arial, sans-serif; text-transform: uppercase; letter-spacing: .08em; }
+		.stat-value { display: block; margin-top: 8px; font-size: 1.3rem; }
+		.table-wrap { overflow-x: auto; } table { width: 100%; border-collapse: collapse; font: .94rem Arial, sans-serif; }
+		th, td { padding: 14px 16px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+		th { color: var(--muted); background: #f2f5f5; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; }
+		tr:last-child td { border-bottom: 0; } td:not(:first-child) { font-variant-numeric: tabular-nums; } code { color: var(--accent-dark); font: .9em Consolas, monospace; }
+		@media (max-width: 620px) { main { padding: 36px 16px 56px; } .summary { grid-template-columns: 1fr; } th, td { padding: 12px 10px; } }
+	</style>
+</head>
+<body>
+	<main>
+		<header>
+			<div class="eyebrow">VIZ1 · Exercise 1</div>
+			<h1>Google Trends, made inspectable.</h1>
+			<p>Exercises 1.2–1.4 load the source data, reshape each weekly record into key/value rows, and measure every search term with d3-array.</p>
+		</header>
+		<section aria-labelledby="load-heading">
+			<h2 id="load-heading">1.2 · Load the data</h2>
+			<div id="load-status" class="status">Loading <code>data/going_out_in_horsens_kw.json</code>…</div>
+			<div id="summary" class="summary" hidden></div>
+		</section>
+		<section aria-labelledby="format-heading">
+			<h2 id="format-heading">1.3 · Format the data</h2>
+			<div class="status">Each datum is converted to <code>{ date, type, value }</code> and combined with <code>flatMap()</code>. Inspect the complete array in the browser console.</div>
+		</section>
+		<section aria-labelledby="measure-heading">
+			<h2 id="measure-heading">1.4 · Measure the data</h2>
+			<div id="table" class="table-wrap" hidden></div>
+		</section>
+	</main>
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+	<script>
+		// The JSON file is inside the data folder, relative to this HTML file.
+		const dataUrl = "data/going_out_in_horsens_kw.json";
+
+		// Exercise 1.3: Convert one original record into one object per search term.
+		// For example, one weekly record becomes three objects: bar, cafe and pizza.
+		function formatDatum(datum, types) {
+			return types.map(type => ({
+				// Convert the date string from JSON into a JavaScript Date object.
+				date: new Date(datum.date),
+				type,
+				// Make sure the Google Trends value is stored as a number.
+				value: Number(datum[type])
+			}));
+		}
+
+		// Format a Date object into a readable date for the page.
+		function formatDate(date) { return d3.timeFormat("%d %b %Y")(date); }
+
+		async function runExercises() {
+			// Exercise 1.2: Load and parse the JSON file asynchronously with D3.
+			const rawData = await d3.json(dataUrl);
+
+			// Display the original data and its field types in the browser console.
+			console.log("Exercise 1.2 - raw data:", rawData);
+			console.log("Data types:", { date: typeof rawData[0].date, value: typeof rawData[0]["bar Horsens"], isPartial: typeof rawData[0].isPartial, format: "JSON array of objects" });
+
+			// Exercise 1.3: Get only the search-term keys.
+			// "date" and "isPartial" are metadata, so they are excluded.
+			const types = Object.keys(rawData[0]).filter(key => key !== "date" && key !== "isPartial");
+
+			// flatMap() formats every weekly record and combines the resulting
+			// small arrays into one flat array of { date, type, value } objects.
+			const formattedData = rawData.flatMap(datum => formatDatum(datum, types));
+			console.log("Exercise 1.3 - formatted data:", formattedData);
+
+			// Exercise 1.4: Create a Map whose keys are the search-term types and
+			// whose values are arrays containing all records for each type.
+			const groupedData = d3.group(formattedData, datum => datum.type);
+			console.log("Exercise 1.4 - grouped data:", groupedData);
+
+			// Log every group separately so its contents are easy to inspect.
+			groupedData.forEach((values, type) => console.log(`Values for ${type}:`, values));
+
+			// Turn the grouped Map into an array and calculate summary statistics
+			// for every search term using functions from d3-array.
+			const measurements = Array.from(groupedData, ([type, values]) => ({
+				type,
+				minimum: d3.min(values, datum => datum.value),
+				maximum: d3.max(values, datum => datum.value),
+				count: values.length,
+				sum: d3.sum(values, datum => datum.value),
+				mean: d3.mean(values, datum => datum.value),
+				median: d3.median(values, datum => datum.value),
+				firstDate: d3.min(values, datum => datum.date),
+				lastDate: d3.max(values, datum => datum.date)
+			}));
+			console.log("Measurements by type:", measurements);
+
+			// Find the earliest and latest dates across the complete dataset.
+			console.log("Overall date range:", { first: d3.min(formattedData, datum => datum.date), last: d3.max(formattedData, datum => datum.date) });
+
+			// Update the visible loading message with the number of loaded records.
+			document.querySelector("#load-status").textContent = `Loaded ${rawData.length} weekly records and ${formattedData.length} formatted values.`;
+
+			// Add the record counts and overall date range to the summary cards.
+			const summary = document.querySelector("#summary");
+			summary.innerHTML = `<div class="stat"><span class="stat-label">Records loaded</span><strong class="stat-value">${rawData.length}</strong></div><div class="stat"><span class="stat-label">Formatted values</span><strong class="stat-value">${formattedData.length}</strong></div><div class="stat"><span class="stat-label">Date range</span><strong class="stat-value">${formatDate(d3.min(formattedData, datum => datum.date))} – ${formatDate(d3.max(formattedData, datum => datum.date))}</strong></div>`;
+			summary.hidden = false;
+
+			// Build and reveal the HTML table containing the measurements.
+			document.querySelector("#table").innerHTML = `<table><thead><tr><th>Type</th><th>Minimum</th><th>Maximum</th><th>Count</th><th>Mean</th><th>Median</th><th>First date</th><th>Last date</th></tr></thead><tbody>${measurements.map(measurement => `<tr><td><code>${measurement.type}</code></td><td>${measurement.minimum}</td><td>${measurement.maximum}</td><td>${measurement.count}</td><td>${measurement.mean.toFixed(1)}</td><td>${measurement.median}</td><td>${formatDate(measurement.firstDate)}</td><td>${formatDate(measurement.lastDate)}</td></tr>`).join("")}</tbody></table>`;
+			document.querySelector("#table").hidden = false;
+		}
+
+		// Run the exercises. If loading fails, explain the likely cause.
+		runExercises().catch(error => {
+			console.error("Could not load the data:", error);
+			document.querySelector("#load-status").textContent = "Could not load the data. Run this page with Live Server so the JSON file can be fetched.";
+		});
+	</script>
+</body>
+</html>
