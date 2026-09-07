@@ -6,14 +6,20 @@
     </head>
     <body>
         <h1>TBD: Selections</h1>
+
+        <!-- SVG container used by D3 for the visualization. -->
         <svg id="container">
+            <!-- These rectangle elements are selected and manipulated in main.js. -->
             <rect></rect>
             <rect></rect>
             <rect> </rect>
             <rect> </rect>
         </svg>
-    
+
+        <!-- Load the D3 library before loading the JavaScript that uses it. -->
         <script src="https://d3js.org/d3.v7.min.js"></script>
+
+        <!-- Load the JavaScript containing the D3 selections. -->
         <script src="./js/main.js"></script>
     </body>
 </html>

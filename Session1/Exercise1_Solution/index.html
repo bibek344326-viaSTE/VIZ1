@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIZ1 Exercises 1 — Going Out in Horsens</title>
+
+  <!-- Page styling and local JavaScript dependencies. D3 must load before main.js. -->
+  <link rel="stylesheet" href="styles.css">
+  <script src="vendor/d3.v7.min.js" defer></script>
+  <script src="main.js" defer></script>
+</head>
+<body>
+  <main class="page-shell">
+    <!-- Introduces the dataset and tells the user where to inspect the results. -->
+    <header class="hero">
+      <p class="eyebrow">VIZ1 · Exercises 1</p>
+      <h1>Going out in Horsens</h1>
+      <p class="intro">
+        Weekly Google Trends interest for bars, cafés, and pizza in Horsens.
+        Open the browser console to inspect the loaded, formatted, grouped,
+        and measured data used to build the chart.
+      </p>
+    </header>
+
+    <!-- Exercises 1.2–1.3: populated after the JSON is loaded and formatted. -->
+    <section class="summary" aria-label="Dataset summary">
+      <article>
+        <span class="summary-label">Period</span>
+        <strong id="period">Loading…</strong>
+      </article>
+      <article>
+        <span class="summary-label">Weekly observations</span>
+        <strong id="observation-count">—</strong>
+      </article>
+      <article>
+        <span class="summary-label">Formatted values</span>
+        <strong id="value-count">—</strong>
+      </article>
+    </section>
+
+    <!-- Exercise 1.5: container for the chart created through D3 data binding. -->
+    <section class="chart-card">
+      <div class="chart-heading">
+        <div>
+          <h2>Search interest over time</h2>
+          <p>Values are Google Trends indices from 0 to 100.</p>
+        </div>
+        <div id="legend" class="legend" aria-label="Series legend"></div>
+      </div>
+
+      <div id="chart" class="chart" role="img" aria-label="Grouped bar chart of weekly search interest"></div>
+      <p class="note">The lighter final bars represent a partial week in the source data.</p>
+    </section>
+
+    <!-- Exercise 1.4: table populated with measurements for each search type. -->
+    <section class="measurements-card">
+      <div class="chart-heading">
+        <div>
+          <h2>Measurements by search type</h2>
+          <p>Calculated with functions from <code>d3-array</code>.</p>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Count</th>
+              <th>Minimum</th>
+              <th>Maximum</th>
+              <th>Mean</th>
+              <th>Median</th>
+              <th>Sum</th>
+              <th>Deviation</th>
+            </tr>
+          </thead>
+          <tbody id="statistics-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Shown if the JSON file cannot be loaded. -->
+    <p id="error-message" class="error-message" hidden></p>
+  </main>
+
+  <!-- Reusable tooltip positioned and populated by main.js. -->
+  <div id="tooltip" class="tooltip" role="status" aria-live="polite"></div>
+</body>
+</html>
